@@ -1,10 +1,9 @@
 import React, { Component } from "react";
 import dateFns from "date-fns";
+import JournalEntry from "./JournalEntry";
 
 class Calendar extends Component {
-  state = {
-    currentMonth: new Date()
-  };
+  state = {};
 
   renderHeader() {
     const dateFormat = "MMMM YYYY";
@@ -12,24 +11,25 @@ class Calendar extends Component {
     return (
       <div className="header row flex-middle">
         <div className="col col-start">
-          <div className="icon" onClick={this.prevMonth}>
+          <div className="icon" onClick={this.props.prevMonth}>
             chevron_left
           </div>
         </div>
         <div className="col col-center">
-          <span>{dateFns.format(this.state.currentMonth, dateFormat)}</span>
+          <span>{dateFns.format(this.props.currentMonth, dateFormat)}</span>
         </div>
-        <div className="col col-end" onClick={this.nextMonth}>
+        <div className="col col-end" onClick={this.props.nextMonth}>
           <div className="icon">chevron_right</div>
         </div>
       </div>
     );
   }
+
   renderDays() {
     const dateFormat = "dddd";
     const days = [];
 
-    let startDate = dateFns.startOfWeek(this.state.currentMonth);
+    let startDate = dateFns.startOfWeek(this.props.currentMonth);
 
     for (let i = 0; i < 7; i++) {
       days.push(
@@ -43,7 +43,7 @@ class Calendar extends Component {
   }
 
   renderCells() {
-    const { currentMonth, selectedDate } = this.state;
+    const { currentMonth } = this.props;
     const monthStart = dateFns.startOfMonth(currentMonth);
     const monthEnd = dateFns.endOfMonth(monthStart);
     const startDate = dateFns.startOfWeek(monthStart);
@@ -76,11 +76,19 @@ class Calendar extends Component {
           <div
             className={`col cell ${dayClass(cloneDay)}`}
             key={day}
-            onClick={() => this.props.onDateClick(dateFns.parse(cloneDay))}
+            onClick={() => {
+              this.props.onDateClick(dateFns.parse(cloneDay));
+            }}
           >
             <span className="number">{formattedDate}</span>
+            <JournalEntry
+              day={cloneDay}
+              showLog={this.props.showLog}
+              monthStart={monthStart}
+            />
           </div>
         );
+
         day = dateFns.addDays(day, 1);
       }
       rows.push(
@@ -93,17 +101,6 @@ class Calendar extends Component {
 
     return <div className="body">{rows}</div>;
   }
-
-  nextMonth = () => {
-    this.setState({
-      currentMonth: dateFns.addMonths(this.state.currentMonth, 1)
-    });
-  };
-  prevMonth = () => {
-    this.setState({
-      currentMonth: dateFns.subMonths(this.state.currentMonth, 1)
-    });
-  };
 
   render() {
     return (
